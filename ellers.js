@@ -2,7 +2,7 @@ var Maze = function(x, y) {
 	this.x_dim     = x;
 	this.y_dim     = y;
 	this.cells     = new Array(x * y).fill(0);
-	this.cell_sets = new Array(x * y).fill(0);
+	this.row_sets  = new Array(x).fill(-1);
 }
 
 Maze.prototype.get = function(x, y) {
@@ -18,70 +18,63 @@ Maze.prototype.set = function(x, y, val) {
 	return this.cells[index];
 }
 
+Maze.prototype.removeWall(x, y, direction) {
+	// (x,y) coordinates of cell to mutate
+	// (direction) 
+}
+
 Maze.prototype.getRow = function (y) {
 	return this.cells.slice(Math.floor(y / this.y_dim), this.x_dim);
 }
 
-var m = new Maze(4, 4);
+function chance() {
+	return (Math.random() >= 0.5);
+}
 
-function firstRow(row) {
-	row.forEach(function(value, index) {
-		console.log(value, index);
-	});
+function adjPave(row_sets, row_num, maze) {
+	if (row_sets.length <= 1) 
+		return row.sets;
+
+	var cells = maze.cells,
+			prev,
+			curr;
+			
+
+	for (var ind = 1; ind < row.length; ind++) {
+		prev = row_sets[ind - 1];
+		curr = row_sets[ind];
+	} 
+
 }
 
 function eller(maze) {
-	var hmap      = {},
-			cells     = maze.cells;
-			sindex    = 1, // Set index (next set_index to add)
-	 		first_row = maze.getRow(0);
-	
-	firstRow(first_row);
+	var cells  = maze.cells,    // Cells of Maze
+			r_sets = maze.row_sets, // Temporary Cell-Set Mapping for row
+			c_set  = 0,							// Current Set 
+			c_row  = 0,             // Current Row Number
+			rows   = maze.y_dim;    // Number of rows in Maze
 
-	var psets = new Set([1]);
-
-	// (1) Initialize first row to new sets
-	for (var cell in first_row) {
-		hmap[cell] = sindex;
-		sindex++;
+	// (Step 1) Initialize First Row
+	for (var m = 0; m < nrows - 2; m++) {
+		r_sets[m] = c_set;
+		c_set++;
 	}
 
-	// (2) Add adjacent cells randomly
-	for (var cell = 0; cell < first_row.length - 1; cell++) {
-		var c_set = hmap[cell],
-				n_set = hmap[cell + 1],
-				toss  = (Math.random() >= 0.5);
+	// (Step 2) Connect adjacent and disjoint cells at random
 
-		if (toss) {
-			hmap[cell + 1]   = c_set;  // assign cell to 
-			cells[cell] += 1 << 3;     // Add east edge to cells
-		} else {
-			psets.add(n_set);
-		}
+	// (Step 3) Remove bottom walls randomly, each set must have at least one bottom wall removed
+
+	// (Step 4) Fill in new row's blank set cells with new unique set numbers
+
+	// (Step 5) Repeat Step 2 - 4 until final row
+
+	// (Step 6) Final Row: connect ALL adjacent and disjoint cells
+	if (c_row === nrows - 1) {
+		// Connect all adjacent and disjoint cells
 	}
 
-	// (3) Tunnel down at least once for each unique (pset member) set 
-	// represented in the row.
-	psets.forEach(function(set_num) {
-		var flag = false;
-		
-		while (!flag) {
-			for (var cell in first_row) {
-				var toss  = (Math.random() >= 0.5);
-				if (hmap[cell] === set_num && toss) {
-					// Tunnel down
-					cells[+cell] += (1 << 1);
-					cells[+cell  + m.y_dim] += (1 << 0);
-					hmap[ +cell  + m.y_dim]  = set_num;
-					flag = true;
-				}
-			}
-		}
-	});
 
-	debugger;
+	return maze;
 }
 
-
-
-eller(m);
+eller(new Maze(4, 4));
