@@ -35,16 +35,17 @@ Maze.prototype.removeWall = function(x, y, direction) {
 
 		case 'W':
 			this.set(x, y, 4);
-			console.log(x, y);
 			return;
 
 		case 'E':
 			this.set(x, y, 8);
-			console.log(x, y);
 			return;
 	}
 }
 
 Maze.prototype.getRow = function (y) {
-	return this.cells.slice(y * this.y_dim, this.x_dim);
+	var start = y * this.y_dim,
+			end   = start + this.x_dim;
+			
+	return this.cells.slice(start, end);
 }
