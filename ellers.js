@@ -6,16 +6,17 @@ function adjPave(row_sets, row_num, maze) {
 	if (row_sets.length <= 1) 
 		return row_sets;
 
-	var cells = maze.cells, prev, curr;
+	var cells  = maze.cells, prev, curr;
+	var former = row_sets.slice(0); // Get history of set that cells were previously in
 
 	for (var ind = 1; ind < row_sets.length; ind++) {
 		prev = row_sets[ind - 1];
 		curr = row_sets[ind];
-		if (curr != prev && chance()) {
+		if (curr !== prev && chance() && curr !== former[ind-1]) {
 			row_sets[ind] = prev;
 			maze.removeWall(ind, row_num, 'W')
 			maze.removeWall(ind - 1, row_num, 'E');
-		}
+		} 
 	} 
 }
 
@@ -34,10 +35,8 @@ function downPave(row_sets, row_num, maze) {
 				groupPaveDown(i, j, row_num, maze);
 			}
 			i = j;
-		}
-		
+		}	
 	}
-
 	// Finally check for last wall -- (TODO clean this up)
 	if (i + 1 === j)  {
 		maze.removeWall(i, row_num, 'S')
@@ -79,7 +78,7 @@ function implyNewSet(old_set, row_num, maze) {
 	return set;
 }
 
-function connect_final_row(set, maze) {
+function finalRow(set, maze) {
 	var row_num = maze.y_dim - 1
 	var row     = maze.getRow(row_num);
 
@@ -99,31 +98,27 @@ function eller(maze) {
 			nrows   = maze.y_dim;    // Number of rows in Maze
 
 	// (Step 1) Initialize First Row
-	for (var m = 0; m < nrows; m++) {
+	for (var m = 0; m < maze.x_dim; m++) {
 		r_sets[m] = c_set;
 		c_set++;
 	}
 
-	// (Step 2) Connect adjacent and disjoint cells at random
-	adjPave(r_sets, c_row, maze);
-	// (Step 3) Remove bottom walls randomly, each set must have at least one bottom wall removed
-	downPave(r_sets, c_row, maze);
-
-	// (Step 5) Repeat Step 2 - 4 until final row
-	for (var row = 1; row < nrows - 1; row++) {
-		// (Step 4) Fill in new row's blank set cells with new unique set numbers
-		r_sets = implyNewSet(r_sets, row, maze);
-		// (Step 2) Connect adjacent and disjoint cells at random
+	// (Step 2) Repeat Step 2a-2c until for each row until the last row
+	for (var row = 0; row < nrows - 1; row++) {
+		// (Step 2a) Connect adjacent and disjoint cells at random
 		adjPave(r_sets,  row, maze);
-		// (Step 3) Remove bottom walls randomly, each set must have at least one bottom wall removed		
+		// (Step 2b) Remove bottom walls randomly, each set must have at least one bottom wall removed		
 		downPave(r_sets, row, maze);
+		console.log(r_sets, 'after down pave');
+		// (Step 2c) Fill in new row's blank set cells with new unique set numbers
+		r_sets = implyNewSet(r_sets, row + 1, maze);
+		console.log(r_sets, 'next set');	
 	}
+	// (Step 3) Final Row: connect ALL adjacent and disjoint cells
+	finalRow(r_sets, maze);
 
-	// (Step 6) Final Row: connect ALL adjacent and disjoint cells
-	r_sets = implyNewSet(r_sets, nrows - 1, maze);
-	connect_final_row(r_sets, maze);
-	
 	return maze;
 }
 
-var maze = eller(new Maze(3, 3));
+var maze = eller(new Maze(13, 13));
+maze.drawGraph(d3, 'eller-generation');
