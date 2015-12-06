@@ -3,7 +3,6 @@ var Maze = function(x, y) {
 	this.y_dim     = y;
 	this.cells     = new Array(x * y).fill(0);
 	this.row_sets  = new Array(x).fill(-1);
-	this.sets      = {};
 }
 
 Maze.prototype.get = function(x, y) {
