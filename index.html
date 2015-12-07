@@ -6,15 +6,23 @@
 <body>
 	<h2><strong>Maze Generation</strong></h2>
 	<p><small>David Siah</small></p>
-	<canvas id="eller-generation" width="910" height="910"></canvas>	
+	<figure>
+		<canvas id="eller-generation" width="916" height="916" style="background-color: black;"></canvas>	
+		<span class="marginnote"> Pictured, a maze (not a labyrinth)</span>
+	</figure>
 	<p> 
 		There are many algorithms for generating mazes. Eller's Maze generation algorithm is a popular algorithm that produces a <a href="http://www.astrolog.org/labyrnth/glossary.htm">low-bias</a> maze in efficient time and space.
 	</p>
 
 	<h3>Eller's Algorithm</h3>
+	<figure>
+		<canvas id="eller-graph" width="916" height="916" style="background-color: white;"></canvas>
+		<span class="marginnote"> Same maze, different representation</span>
+	</figure >
 	<script type="text/javascript" src="fset.js"></script>
 	<script type="text/javascript" src="d3.v3.min.js"></script>
 	<script type="text/javascript" src="Maze.js"></script>
 	<script type="text/javascript" src="ellers.js"></script>
+
 </body>
 </html>

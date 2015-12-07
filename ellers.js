@@ -65,6 +65,7 @@ function downPave(sets, row, maze) {
 			i = j;
 		}	
 	}
+
 	// Finally check for last wall -- (TODO clean this up)
 	if (i + 1 === j)  {
 		maze.removeWall(i, row, 'S')
@@ -129,5 +130,6 @@ function chance() {
 	return (Math.random() >= 0.5);
 }
 
-var maze = eller(new Maze(30, 30));
-maze.animateGraph(d3, 'eller-generation');
+var maze = eller(new Maze(45, 45));
+maze.animateMaze(d3,  'eller-generation');
+maze.animateGraph(d3, 'eller-graph');

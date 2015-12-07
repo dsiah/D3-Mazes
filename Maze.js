@@ -52,14 +52,56 @@ Maze.prototype.drawMaze = function(d3, id) {
 	var canvas = d3.select('#' + id);
 }
 
+Maze.prototype.animateMaze = function(d3, id) {
+	var canvas  = d3.select('#' + id),
+			ctx = canvas.node().getContext("2d"),
+			padding = 10,
+			node_x  = 9,
+			offset  = 5,
+			count   = 0,
+			node_y  = 9;
+
+	ctx.scale(2,2); // For Retina Screens
+
+	var stopme = window.setInterval(function() { 
+		var y = count;
+
+		for (var x = 0; x < maze.x_dim; x++) {
+			var cell = maze.get(x, y);
+
+			// ctx.fillStyle = "steelblue";
+			ctx.fillStyle = "white";
+			ctx.fillRect(x * padding + offset, y * padding + offset, node_x, node_y);
+			// ctx.fillStyle = "orange";
+			ctx.fillStyle = "white";
+			// Draw East
+			if (cell & 8) {
+				ctx.fillRect(node_x + (x * padding) + offset,  y * padding + offset, padding - node_x, node_y);
+				// ctx.fillRect(node_x + (x * padding) + offset,  y * padding + offset + node_y / 4, padding - node_x, node_y / 2);
+			}
+			// Draw South
+			if (cell & 2) {
+				ctx.fillRect((x * padding) + offset, y * padding + offset + node_y, node_x, padding - node_y);
+				// ctx.fillRect((x * padding) + offset + node_x/4, y * padding + offset + node_y, node_x / 2, padding - node_y);
+			}
+		}
+
+		count++;
+
+		if (count > maze.y_dim - 1) {
+			window.clearInterval(stopme);
+		}
+	}, 12);
+}
+
 Maze.prototype.animateGraph = function(d3, id) {
 	var canvas  = d3.select('#' + id),
 			ctx = canvas.node().getContext("2d"),
-			padding = 15,
-			node_x  = 6,
+			padding = 10,
+			node_x  = 5,
 			offset  = 5,
 			count   = 0,
-			node_y  = 6;
+			node_y  = 5;
 
 	ctx.scale(2,2); // For Retina Screens
 
@@ -70,20 +112,25 @@ Maze.prototype.animateGraph = function(d3, id) {
 			var cell = maze.get(x, y);
 
 			ctx.fillStyle = "steelblue";
-			ctx.fillRect(x * padding + offset, y * padding + offset, node_x, node_y);
+			ctx.fillRect(x * padding + (3*offset/2), y * padding + (3*offset/2), node_x, node_y);
 			ctx.fillStyle = "orange";
+			
 			// Draw East
 			if (cell & 8) {
-				ctx.fillRect(node_x + (x * padding) + offset,  y * padding + offset + node_y / 4, padding - node_x, node_y / 2);
+				
+				ctx.fillRect(node_x + (x * padding) + (3*offset/2),  y * padding + (3*offset/2) + node_y / 4, padding - node_x, node_y / 2);
 			}
 			// Draw South
 			if (cell & 2) {
-				ctx.fillRect((x * padding) + offset + node_x/4, y * padding + offset + node_y, node_x / 2, padding - node_y);
+				// ctx.fillRect((x * padding) + offset, y * padding + offset + node_y, node_x, padding - node_y);
+				ctx.fillRect((x * padding) + (3*offset/2) + node_x/4, y * padding + (3*offset/2) + node_y, node_x / 2, padding);
 			}
 		}
+
 		count++;
+
 		if (count > maze.y_dim - 1) {
 			window.clearInterval(stopme);
 		}
-	}, 100);
+	}, 12);
 }
