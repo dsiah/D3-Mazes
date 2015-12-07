@@ -1,124 +1,134 @@
-function chance() {
-	return (Math.random() >= 0.5);
+function eller(maze) {
+	var c_set  = maze.x_dim,		// Current Set 
+			cells  = maze.cells,    // Cells of Maze
+			nrows  = maze.y_dim,    // Number of rows in Maze
+			sets   = new Array(maze.x_dim).fill(null);	
+
+	// (Step 1) Initialize First Row
+	for (var i = 0; i < c_set; i++) {
+		sets[i] = new Fset([i]);
+	}
+	debugger;
+	// (Step 2) Repeat Step 2a-2c until for each row until the last row
+	for (var row = 0; row < nrows - 1; row++) {
+		console.log(sets);
+		debugger;
+		// (Step 2a) Connect adjacent and disjoint cells at random
+		console.log(row, sets);
+		adjPave(sets, row, maze);
+		// (Step 2b) Remove bottom walls randomly, each set must have at least one bottom wall removed		
+		console.log(row, sets, 'after');
+		downPave(sets, row, maze);
+		// (Step 2c) Fill in new row's blank set cells with new unique set numbers
+		results = setRefresh(sets, row + 1, maze);
+		sets    = results.set;
+		c_set   = results.max;
+	}
+	// (Step 3) Final Row: connect ALL adjacent and disjoint cells
+	console.log('final row', sets);
+	finalRow(sets, maze);
+	return maze;
 }
 
-function adjPave(row_sets, row_num, maze) {
-	if (row_sets.length <= 1) 
-		return row_sets;
+function adjPave(sets, row, maze) {
+	var	prev, curr, next;
 
-	var cells  = maze.cells, prev, curr;
-	var former = row_sets.slice(0); // Get history of set that cells were previously in
+	for (var i = 1; i < sets.length; i++) {
+		prev = sets[i - 1];
+		curr = sets[i];
 
-	for (var ind = 1; ind < row_sets.length; ind++) {
-		prev = row_sets[ind - 1];
-		curr = row_sets[ind];
-		if (curr !== prev && chance() && curr !== former[ind-1]) {
-			row_sets[ind] = prev;
-			maze.removeWall(ind, row_num, 'W')
-			maze.removeWall(ind - 1, row_num, 'E');
+		if (curr.intersectWith(prev) && chance()) {
+			console.log('adding members of', curr, 'to', prev);
+			
+			curr.undirectedAdd(prev);
+			maze.removeWall(i, row, 'W')
+			maze.removeWall(i - 1, row, 'E');
 		} 
 	} 
 }
 
-function downPave(row_sets, row_num, maze) {
+function downPave(sets, row, maze) {
 	// Pave down for all sets with one member
 	// Otherwise randomly select member(s) of the set to pave down --> see groupPaveDown
 	var i = 0;
-	for (var j = 0; j < row_sets.length; j++) {
-		if (row_sets[i] !== row_sets[j]) {
+	for (var j = 0; j < sets.length; j++) {
+		var curr = sets[j], prev = sets[i];
+
+		if (curr.intersectWith(prev)) {
 			if (j - i === 1) {
 				// Case: set with one member -> Pave Down
-				maze.removeWall(i, row_num, 'S');
-				maze.removeWall(i, row_num + 1, 'N');
+				maze.removeWall(i, row, 'S');
+				maze.removeWall(i, row + 1, 'N');
 			} else {
 				// Case 2: case with multiple members -> groupPaveDown
-				groupPaveDown(i, j, row_num, maze);
+				groupPaveDown(i, j, row, maze);
 			}
 			i = j;
 		}	
 	}
 	// Finally check for last wall -- (TODO clean this up)
 	if (i + 1 === j)  {
-		maze.removeWall(i, row_num, 'S')
-		maze.removeWall(i, row_num + 1, 'N')
+		maze.removeWall(i, row, 'S')
+		maze.removeWall(i, row + 1, 'N')
 	} else {
-		groupPaveDown(i + 1, j, row_num, maze);	
+		groupPaveDown(i + 1, j, row, maze);	
 	}
 }
 
-function groupPaveDown(start, end, row_num, maze) {
+function groupPaveDown(start, end, row, maze) {
 	// Make one or more paves down (and up from next row)
 	var not_paved = true;
 	while (not_paved) {
 		// Keep trying until one or more cells pave down
 		for (var i = start; i < end; i++) {
 			if (chance()) {
-				maze.removeWall(i, row_num, 'S');
-				maze.removeWall(i, row_num + 1, 'N');
+				maze.removeWall(i, row, 'S');
+				maze.removeWall(i, row + 1, 'N');
 				not_paved = false;
 			}
 		}
 	}
 }
 
-function implyNewSet(old_set, row_num, maze) {
-	var row = maze.getRow(row_num),
-			set = new Array(old_set.length),
-			max = Math.max.apply(null, old_set);
+function setRefresh(old_set, row, maze) {
+	var curr  = maze.getRow(row),
+			set   = new Array(old_set.length),
+			maxes = old_set.map(function(i) { return i.getMax() }),
+			max   = Math.max.apply(null, maxes) + 1; 
 
 	for (var i = 0; i < old_set.length; i++) {
-		if (row[i] === 1) {
+		if (curr[i] === 1) {
 			set[i] = old_set[i];
 		} else {
-			max += 1;
-			set[i] = max;
+			set[i] = new Fset([max]);
+			max   += 1;
 		}
 	}
-
-	return set;
+	return { set: set, max: max };
 }
 
-function finalRow(set, maze) {
-	var row_num = maze.y_dim - 1
-	var row     = maze.getRow(row_num);
+function finalRow(sets, maze) {
+	var row_num = maze.y_dim - 1,
+			row     = maze.getRow(row_num),
+			curr, prev;
 
-	for (var i = 1; i < set.length; i++) {
-		if (set[i] !== set[i - 1]) {
+	for (var i = 1; i < sets.length; i++) {
+		curr = sets[i];
+		prev = sets[i - 1];
+
+		if (curr.intersectWith(prev)) {
+			curr.undirectedAdd(prev);
 			maze.removeWall(i,     row_num, 'W');
 			maze.removeWall(i - 1, row_num, 'E');
 		}
 	}
 }
 
-function eller(maze) {
-	var cells  = maze.cells,     // Cells of Maze
-			r_sets = maze.row_sets,  // Temporary Cell-Set Mapping for row
-			c_set  = 1,							 // Current Set 
-			c_row  = 0,              // Current Row Number
-			nrows   = maze.y_dim;    // Number of rows in Maze
-
-	// (Step 1) Initialize First Row
-	for (var m = 0; m < maze.x_dim; m++) {
-		r_sets[m] = c_set;
-		c_set++;
-	}
-
-	// (Step 2) Repeat Step 2a-2c until for each row until the last row
-	for (var row = 0; row < nrows - 1; row++) {
-		// (Step 2a) Connect adjacent and disjoint cells at random
-		adjPave(r_sets,  row, maze);
-		// (Step 2b) Remove bottom walls randomly, each set must have at least one bottom wall removed		
-		downPave(r_sets, row, maze);
-		console.log(r_sets, 'after down pave');
-		// (Step 2c) Fill in new row's blank set cells with new unique set numbers
-		r_sets = implyNewSet(r_sets, row + 1, maze);
-		console.log(r_sets, 'next set');	
-	}
-	// (Step 3) Final Row: connect ALL adjacent and disjoint cells
-	finalRow(r_sets, maze);
-
-	return maze;
+function chance() {
+	return (Math.random() >= 0.5);
 }
 
-var maze = eller(new Maze(13, 13));
-maze.drawGraph(d3, 'eller-generation');
+var maze = eller(new Maze(5, 5));
+
+//maze.drawGraph(d3, 'eller-generation');
+maze.animateGraph(d3, 'eller-generation');
