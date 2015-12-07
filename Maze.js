@@ -2,7 +2,6 @@ var Maze = function(x, y) {
 	this.x_dim     = x;
 	this.y_dim     = y;
 	this.cells     = new Array(x * y).fill(0);
-	this.row_sets  = new Array(x).fill(-1);
 }
 
 Maze.prototype.get = function(x, y) {
@@ -53,33 +52,38 @@ Maze.prototype.drawMaze = function(d3, id) {
 	var canvas = d3.select('#' + id);
 }
 
-Maze.prototype.drawGraph = function(d3, id) {
+Maze.prototype.animateGraph = function(d3, id) {
 	var canvas  = d3.select('#' + id),
-	 		context = canvas.node().getContext("2d"),
-	 		padding = 15,
+			ctx = canvas.node().getContext("2d"),
+			padding = 15,
 			node_x  = 6,
+			offset  = 5,
+			count   = 0,
 			node_y  = 6;
 
-	context.scale(2,2);
+	ctx.scale(2,2); // For Retina Screens
 
-	for (var y = 0; y < maze.y_dim; y++) {
+	var stopme = window.setInterval(function() { 
+		var y = count;
+
 		for (var x = 0; x < maze.x_dim; x++) {
-			var cell = this.get(x, y);
+			var cell = maze.get(x, y);
 
-			context.fillStyle = "steelblue";
-			context.fillRect(x * padding + 10, y * padding + 10, node_x, node_y);
-			
-			context.fillStyle = "orange";
-
+			ctx.fillStyle = "steelblue";
+			ctx.fillRect(x * padding + offset, y * padding + offset, node_x, node_y);
+			ctx.fillStyle = "orange";
 			// Draw East
 			if (cell & 8) {
-				context.fillRect(node_x + (x * padding) + 10,  y * padding + 10 + node_y / 4, padding - node_x, node_y / 2);
+				ctx.fillRect(node_x + (x * padding) + offset,  y * padding + offset + node_y / 4, padding - node_x, node_y / 2);
 			}
-
 			// Draw South
 			if (cell & 2) {
-				context.fillRect((x * padding) + 10 + node_x/4, y * padding + 10 + node_y, node_x / 2, padding - node_y);
+				ctx.fillRect((x * padding) + offset + node_x/4, y * padding + offset + node_y, node_x / 2, padding - node_y);
 			}
 		}
-	}
+		count++;
+		if (count > maze.y_dim - 1) {
+			window.clearInterval(stopme);
+		}
+	}, 100);
 }

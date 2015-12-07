@@ -1,5 +1,11 @@
-var Fset = function() {
+var Fset = function(list) {
 	this.values = {};
+	// If values are supplied -> init Fset with them
+	if (list) {
+		for (var i = 0; i < list.length; i++) {
+			this.values[list[i]] = true;
+		}
+	}
 }
 
 Fset.prototype.add = function(i) {
@@ -23,8 +29,7 @@ Fset.prototype.clone = function(fset) {
 }
 
 Fset.prototype.intersectWith = function(fset2) {
-	var keys  = Object.keys(this),
-			inter = {};
+	var keys  = Object.keys(this);
 
 	for (var key in this.values) {
 		if (fset2.values[key])
@@ -34,8 +39,23 @@ Fset.prototype.intersectWith = function(fset2) {
 	return true;
 }
 
-// Tests
-// var f = new Fset();
-// var g = new Fset();
-// f.addAll([1,2,3]);
-// g.addAll([2,3,4]);
+Fset.prototype.undirectedAdd = function(fset2) {
+	for (var key in fset2.values) {
+		this.values[key] = true;
+	}
+
+	for (var key in this.values) {
+		fset2.values[key] = true;
+	}
+}
+
+Fset.prototype.getMax  = function() {
+	var top;
+	
+	for (var key in this.values) {
+		if (key > top || !top) 
+			top = key;
+	}
+
+	return Number(top);
+}
