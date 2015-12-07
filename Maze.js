@@ -53,6 +53,10 @@ Maze.prototype.drawMaze = function(d3, id) {
 }
 
 Maze.prototype.animateMaze = function(d3, id) {
+	var gradient = d3.scale.linear()
+									 .domain([0, maze.cells.length / 2 ,maze.cells.length])
+									 .range(['steelblue', 'white', 'red']);
+
 	var canvas  = d3.select('#' + id),
 			ctx = canvas.node().getContext("2d"),
 			padding = 10,
@@ -66,23 +70,22 @@ Maze.prototype.animateMaze = function(d3, id) {
 	var stopme = window.setInterval(function() { 
 		var y = count;
 
-		for (var x = 0; x < maze.x_dim; x++) {
-			var cell = maze.get(x, y);
 
-			// ctx.fillStyle = "steelblue";
-			ctx.fillStyle = "white";
+		for (var x = 0; x < maze.x_dim; x++) {
+			var cell      = maze.get(x, y),
+					cell_val  = count * maze.y_dim + x,
+					color     = gradient(cell_val);
+			
+			ctx.fillStyle = color;
 			ctx.fillRect(x * padding + offset, y * padding + offset, node_x, node_y);
-			// ctx.fillStyle = "orange";
-			ctx.fillStyle = "white";
+			ctx.fillStyle = color;
 			// Draw East
 			if (cell & 8) {
 				ctx.fillRect(node_x + (x * padding) + offset,  y * padding + offset, padding - node_x, node_y);
-				// ctx.fillRect(node_x + (x * padding) + offset,  y * padding + offset + node_y / 4, padding - node_x, node_y / 2);
 			}
 			// Draw South
 			if (cell & 2) {
 				ctx.fillRect((x * padding) + offset, y * padding + offset + node_y, node_x, padding - node_y);
-				// ctx.fillRect((x * padding) + offset + node_x/4, y * padding + offset + node_y, node_x / 2, padding - node_y);
 			}
 		}
 
@@ -91,7 +94,7 @@ Maze.prototype.animateMaze = function(d3, id) {
 		if (count > maze.y_dim - 1) {
 			window.clearInterval(stopme);
 		}
-	}, 12);
+	}, 30);
 }
 
 Maze.prototype.animateGraph = function(d3, id) {
@@ -103,7 +106,7 @@ Maze.prototype.animateGraph = function(d3, id) {
 			count   = 0,
 			node_y  = 5;
 
-	ctx.scale(2,2); // For Retina Screens
+	ctx.scale(2,2);
 
 	var stopme = window.setInterval(function() { 
 		var y = count;
@@ -117,12 +120,10 @@ Maze.prototype.animateGraph = function(d3, id) {
 			
 			// Draw East
 			if (cell & 8) {
-				
 				ctx.fillRect(node_x + (x * padding) + (3*offset/2),  y * padding + (3*offset/2) + node_y / 4, padding - node_x, node_y / 2);
 			}
 			// Draw South
 			if (cell & 2) {
-				// ctx.fillRect((x * padding) + offset, y * padding + offset + node_y, node_x, padding - node_y);
 				ctx.fillRect((x * padding) + (3*offset/2) + node_x/4, y * padding + (3*offset/2) + node_y, node_x / 2, padding);
 			}
 		}

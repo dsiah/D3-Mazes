@@ -5,19 +5,38 @@
 </head>
 <body>
 	<h2><strong>Maze Generation</strong></h2>
-	<p><small>David Siah</small></p>
+	<p><blockqote><small>David Siah</small></blockquote></p>
 	<figure>
 		<canvas id="eller-generation" width="916" height="916" style="background-color: black;"></canvas>	
-		<span class="marginnote"> Pictured, a maze (not a labyrinth)</span>
+		<span class="marginnote" style="margin-top: 10;"> 
+			<b>Pictured</b>: a maze <i>(not a labyrinth)</i>, a gradient showing cell generation order, and French solidarity.
+		</span>
 	</figure>
 	<p> 
-		There are many algorithms for generating mazes. Eller's Maze generation algorithm is a popular algorithm that produces a <a href="http://www.astrolog.org/labyrnth/glossary.htm">low-bias</a> maze in efficient time and space.
+		There are many algorithms for generating mazes. Eller's Maze generation algorithm is a popular algorithm that produces a <a href="http://www.astrolog.org/labyrnth/glossary.htm" target="_blank">low-bias</a> maze in efficient time and space.
 	</p>
 
+	<h3>Encoding Mazes</h3>
+	<p>
+		Before we discuss the algorithm, let's take a step back and discuss methods for encoding mazes. If there is one thing you take away from this discussion, it is that <b>mazes are graphs</b> and while you may interpret graphs as the cartesian plane, graphs are more generally a "bunch of dots" and "lines between the dots". 
+		<span class="marginnote" style="margin-top: 10;"> 
+			<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/2D_Cartesian_Coordinates.svg/376px-2D_Cartesian_Coordinates.svg.png">
+			<b>Pictured</b>: the Cartesian plane, or coordinate system. The space where we project visual representations of 2 (or less) dimension curves as well as our irrational hatred of calculus.
+		</span>
+		They are more formally called <b>vertices</b> and <b>edges</b>. In this paticular case these mazes are trees (graphs with no loops) and therefore:
+		<blockquote> Mazes &#65515; Trees &#65515; Graphs. </blockquote>
+	</p>
+
+	<p>Graphs are very useful for real world problems. These algorithms are integral to logistics, biology, language, and even <a href="https://www.youtube.com/watch?v=Ylare5LoDdE" target="_blank">search engines</a>.</p>
+
+
 	<h3>Eller's Algorithm</h3>
+	<p>
+		This algorithm is extremely <a href="https://en.wikipedia.org/wiki/Big_O_notation" target="_blank">efficient</a>. The process is practically instantaneous in the browser environment and it moves in  a linear fashion from top to bottom. Eller's algorithm is based on the idea of mapping cells in the maze to sets and then merging these sets together when connections are (randomly) established between disjoint sets.
+	</p>
 	<figure>
 		<canvas id="eller-graph" width="916" height="916" style="background-color: white;"></canvas>
-		<span class="marginnote"> Same maze, different representation</span>
+		<span class="marginnote"> <b>Pictured</b>: Same maze, different representation</span>
 	</figure >
 	<script type="text/javascript" src="fset.js"></script>
 	<script type="text/javascript" src="d3.v3.min.js"></script>
