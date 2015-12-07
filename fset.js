@@ -59,3 +59,9 @@ Fset.prototype.getMax  = function() {
 
 	return Number(top);
 }
+
+Fset.prototype.copy = function(source) {
+	for (var key in source.values) {
+		this.values[key] = true;
+	}
+}

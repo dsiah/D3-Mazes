@@ -8,43 +8,42 @@ function eller(maze) {
 	for (var i = 0; i < c_set; i++) {
 		sets[i] = new Fset([i]);
 	}
-	debugger;
 	// (Step 2) Repeat Step 2a-2c until for each row until the last row
 	for (var row = 0; row < nrows - 1; row++) {
-		console.log(sets);
-		debugger;
 		// (Step 2a) Connect adjacent and disjoint cells at random
-		console.log(row, sets);
 		adjPave(sets, row, maze);
 		// (Step 2b) Remove bottom walls randomly, each set must have at least one bottom wall removed		
-		console.log(row, sets, 'after');
 		downPave(sets, row, maze);
 		// (Step 2c) Fill in new row's blank set cells with new unique set numbers
-		results = setRefresh(sets, row + 1, maze);
+		results = setRefresh(sets, row + 1, maze, c_set);
 		sets    = results.set;
 		c_set   = results.max;
 	}
 	// (Step 3) Final Row: connect ALL adjacent and disjoint cells
-	console.log('final row', sets);
 	finalRow(sets, maze);
 	return maze;
 }
 
 function adjPave(sets, row, maze) {
-	var	prev, curr, next;
+	var	prev, curr;
 
 	for (var i = 1; i < sets.length; i++) {
 		prev = sets[i - 1];
 		curr = sets[i];
 
 		if (curr.intersectWith(prev) && chance()) {
-			console.log('adding members of', curr, 'to', prev);
-			
 			curr.undirectedAdd(prev);
 			maze.removeWall(i, row, 'W')
 			maze.removeWall(i - 1, row, 'E');
 		} 
-	} 
+	}
+
+	for (var j = sets.length - 1; j > 0; j--) {
+		prev = sets[j - 1];
+		curr = sets[j];
+		if (!prev.intersectWith(curr))
+			prev.undirectedAdd(curr);
+	}
 }
 
 function downPave(sets, row, maze) {
@@ -90,15 +89,17 @@ function groupPaveDown(start, end, row, maze) {
 	}
 }
 
-function setRefresh(old_set, row, maze) {
+function setRefresh(old_set, row, maze, maxi) {
 	var curr  = maze.getRow(row),
 			set   = new Array(old_set.length),
 			maxes = old_set.map(function(i) { return i.getMax() }),
-			max   = Math.max.apply(null, maxes) + 1; 
+			max   = maxi + 1;
 
 	for (var i = 0; i < old_set.length; i++) {
 		if (curr[i] === 1) {
-			set[i] = old_set[i];
+			var clone = new Fset();
+			clone.copy(old_set[i]);
+			set[i] = clone;
 		} else {
 			set[i] = new Fset([max]);
 			max   += 1;
@@ -128,7 +129,5 @@ function chance() {
 	return (Math.random() >= 0.5);
 }
 
-var maze = eller(new Maze(5, 5));
-
-//maze.drawGraph(d3, 'eller-generation');
+var maze = eller(new Maze(30, 30));
 maze.animateGraph(d3, 'eller-generation');
